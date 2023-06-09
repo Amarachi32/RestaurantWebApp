@@ -3,9 +3,11 @@ using Domain.DbContext;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Persistence;
-using Presentation;
+using Persistence.Configuration;
+using Presentation.Implementation;
+using Presentation.Interfaces;
 using RestaurantWebApp.API.CustomTokenProvider;
+using Services.Extension;
 
 namespace RestaurantWebApp.API
 {
@@ -54,6 +56,9 @@ namespace RestaurantWebApp.API
             builder.Services.AddTransient<IEmailService, EmailService>();
             //builder.Services.AddTransient<IMessageSender, MessageSender>();
             //builder.Services.Configure<SMSoptions>(Configuration);
+            builder.Services.ConfigureRepo();
+
+            builder.Services.ServiceConfigure();
 
             builder.Services.AddControllers();
             

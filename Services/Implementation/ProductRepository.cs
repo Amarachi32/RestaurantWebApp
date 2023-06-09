@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Presentation
+namespace Services.Implementation
 {
-    public interface IEmailService
+    public class ProductRepository
     {
     }
 }

@@ -1,5 +1,4 @@
-﻿
-namespace Persistence
+﻿namespace Persistence.Configuration
 {
     public class EmailConfiguration
     {
