@@ -8,5 +8,7 @@ namespace Presentation.Interfaces
 {
     public interface IServiceManager
     {
+        IProductService productService { get; }
+        IOrderService orderService { get; }
     }
 }
