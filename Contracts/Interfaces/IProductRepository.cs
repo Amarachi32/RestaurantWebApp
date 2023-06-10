@@ -11,6 +11,9 @@ namespace Contracts.Interfaces
     public interface IProductRepository
     {
         IEnumerable<Product> GetAllProducts(bool trackChanges);
-
+        Product GetProduct(int productId, bool trackChanges);
+        void CreateProduct(Product product);
+        void DeleteProduct(Product product);
+        void UpdateProduct(Product product);
     }
 }

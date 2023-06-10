@@ -10,5 +10,6 @@ namespace Contracts.Interfaces
     {
         IProductRepository productRepository { get; }
         IOrderRepository orderRepository { get; }
+        void Save();
     }
 }

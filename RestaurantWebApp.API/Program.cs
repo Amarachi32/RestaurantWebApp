@@ -8,6 +8,8 @@ using Presentation.Implementation;
 using Presentation.Interfaces;
 using RestaurantWebApp.API.CustomTokenProvider;
 using Services.Extension;
+using System.Reflection;
+using AutoMapper;
 
 namespace RestaurantWebApp.API
 {
@@ -16,10 +18,9 @@ namespace RestaurantWebApp.API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
             builder.Services.AddDbContext<ApplicationDbContext>(opts =>
                 opts.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+          
             builder.Services.AddIdentity<User, IdentityRole>(opt =>
             {
                 opt.Password.RequiredLength = 6;
@@ -56,8 +57,11 @@ namespace RestaurantWebApp.API
             builder.Services.AddTransient<IEmailService, EmailService>();
             //builder.Services.AddTransient<IMessageSender, MessageSender>();
             //builder.Services.Configure<SMSoptions>(Configuration);
+           // builder.Services.AddAutoMapper(typeof(Program));
+         
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
+            builder.Services.AddAutoMapper(Assembly.Load("Persistence"));
             builder.Services.ConfigureRepo();
-
             builder.Services.ServiceConfigure();
 
             builder.Services.AddControllers();
