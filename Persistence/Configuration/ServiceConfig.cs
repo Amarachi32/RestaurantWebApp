@@ -13,6 +13,7 @@ namespace Persistence.Configuration
     {
         public static void ServiceConfigure(this IServiceCollection services) {
             services.AddScoped<IServiceManager, ServiceManager>();
+            services.AddTransient<IBraintreeService, BraintreeService>();
         }
     }
 }

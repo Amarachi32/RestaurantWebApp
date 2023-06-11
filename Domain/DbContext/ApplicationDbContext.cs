@@ -16,7 +16,8 @@ namespace Domain.DbContext
         public DbSet<Order>Orders { get; set; }
         public DbSet<Contact>Contacts { get; set; }
         public DbSet<Payment>Payments { get; set; }
-
+        public DbSet<GalleryImage> GalleryImages { get; set; }
+        public DbSet<ImageTag> ImageTags { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
