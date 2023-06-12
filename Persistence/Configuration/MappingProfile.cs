@@ -14,6 +14,7 @@ namespace Persistence.Configuration
         public MappingProfile()
         {
             CreateMap<CreateProductDto, Product>();
+            CreateMap<Product, CreateProductDto>();
             CreateMap<UpdateProductDto, Product>();
             CreateMap<GetProductDto, Product>();
         }
