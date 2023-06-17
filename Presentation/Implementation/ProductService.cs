@@ -56,11 +56,11 @@ namespace Presentation.Implementation
             }
         }
 
-        public GetProductDto GetProduct(int productId, bool trackChanges)
+        public GetOneProductDto GetProduct(int productId, bool trackChanges)
         {
             var product = _repositoryWrapper.productRepository.GetProduct(productId, trackChanges);
             //Check if the company is null
-            var productDto = _mapper.Map<GetProductDto>(product);
+            var productDto = _mapper.Map<GetOneProductDto>(product);
             return productDto;
 
         }
@@ -81,11 +81,20 @@ namespace Presentation.Implementation
             }
         }
 
-        public void UpdateProduct(int ProductId, UpdateProductDto productUpdate, bool trackChanges)
+        public async Task UpdateProduct(int productId, UpdateProductDto productUpdate, bool trackChanges)
         {
-            var productEntity = _repositoryWrapper.productRepository.GetProduct(ProductId, trackChanges);
-            _mapper.Map(productUpdate, productEntity);
-            _repositoryWrapper.Save();
+            var productEntityId = _mapper.Map<Product>(productUpdate);
+            _repositoryWrapper.productRepository.GetProduct(productId, trackChanges);
+            if (productEntityId.ProductId != productUpdate.ProductId)
+            {
+                throw new Exception();
+            }
+
+         /*   var productEntity = _mapper.Map<Product>(productUpdate);
+              _repositoryWrapper.productRepository.UpdateProduct(productEntity);*/
+
+            _mapper.Map(productUpdate, productEntityId);
+             _repositoryWrapper.Save();
         }
     }
 }

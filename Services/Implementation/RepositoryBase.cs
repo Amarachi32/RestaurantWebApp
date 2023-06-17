@@ -20,12 +20,34 @@ namespace Services.Implementation
 
         public void Create(T entity)
         {
-            throw new NotImplementedException();
+            _context.Set<T>().Add(entity);
+           /* if (entity == null)
+            {
+                throw new ArgumentNullException("entity");
+            }
+
+            if (FindByCondition(x => x.Id == entity.Id, false).Any())
+            {
+                throw new ArgumentException("Entity already exists.", "entity");
+            }
+            _context.Set<T>().Add(entity);
+            _context.SaveChanges();*/
         }
 
         public void Delete(T entity)
         {
-            throw new NotImplementedException();
+           /* // Validate the entity.
+            if (entity == null)
+            {
+                throw new ArgumentNullException("entity");
+            }
+
+            // Find the entity in the database.
+            T existingEntity = _context.Set<T>().Find(entity.Id);*/
+
+            // Delete the entity from the database.
+            _context.Set<T>().Remove(entity);
+          //  _context.SaveChanges();
         }
 
         public IQueryable<T> FindAll(bool trackChanges) =>
@@ -38,19 +60,37 @@ namespace Services.Implementation
         .AsNoTracking() :_context.Set<T>()
         .Where(expression);
 
-        /* public IQueryable<T> FindAll(bool trackChanges)
-         {
-             throw new NotImplementedException();
-         }
-
-         public IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression, bool trackChanges)
-         {
-             throw new NotImplementedException();
-         }*/
 
         public void Update(T entity)
         {
-            throw new NotImplementedException();
+            /* // Validate the entity.
+             if (entity == null)
+             {
+                 throw new ArgumentNullException("entity");
+             }
+
+             // Find the entity in the database.
+             T existingEntity = _context.Set<T>().Find(entity.Id);
+
+             // Update the entity properties.
+             foreach (var property in entity.GetType().GetProperties())
+             {
+                 if (property.CanWrite)
+                 {
+                     property.SetValue(existingEntity, property.GetValue(entity));
+                 }
+             }*/
+
+            // Save the changes to the database.
+            _context.Set<T>().Update(entity);
+            _context.SaveChanges();
+
+          /*  using(TContext context = new TContext)
+            {
+                var updatedState = _context.Entry(entity);
+                updatedState.State= EntityState.Modified;
+                _context.SaveChanges();
+            }*/
         }
     }
 }

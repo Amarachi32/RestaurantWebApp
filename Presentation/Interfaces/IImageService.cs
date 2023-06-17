@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,11 +8,14 @@ using System.Threading.Tasks;
 
 namespace Presentation.Interfaces
 {
-    public interface IImageService
+    public interface IIMageService
     {
-        IEnumerable<GalleryImage> GetAll();
-        IEnumerable<GalleryImage> GetWithTag(string tag);
-        GalleryImage GetById(int id);
+        Task<string> UploadImageAsync(IFormFile imageFile);
+     //   IEnumerable<GalleryImage> GetAll();
+      //  Task<GalleryImage> AddPhoto(IFormFile file);
+       // Task<string> DeletePhoto(int Id);
+       // IEnumerable<GalleryImage> GetWithTag(string tag);
+       // GalleryImage GetById(int id);
 
     }
 }

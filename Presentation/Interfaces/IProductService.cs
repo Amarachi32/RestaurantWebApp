@@ -13,10 +13,10 @@ namespace Presentation.Interfaces
     {
         IEnumerable<Product> GetAllProducts(bool trackChanges);
 
-        GetProductDto GetProduct(int productId, bool trackChanges);
+        GetOneProductDto GetProduct(int productId, bool trackChanges);
         IEnumerable<GetProductDto> GetProducts(bool trackChanges);
         CreateProductDto CreateProduct(CreateProductDto product);
-        void UpdateProduct(int ProductId, UpdateProductDto product, bool trackChanges);
+        Task UpdateProduct(int ProductId, UpdateProductDto product, bool trackChanges);
         void DeleteProduct(int productId, bool trackChanges);
     }
 }

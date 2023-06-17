@@ -15,8 +15,15 @@ namespace Persistence.Configuration
         {
             CreateMap<CreateProductDto, Product>();
             CreateMap<Product, CreateProductDto>();
+                //.ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category));
             CreateMap<UpdateProductDto, Product>();
+            CreateMap<Product, UpdateProductDto>();
+           
             CreateMap<GetProductDto, Product>();
+            CreateMap<Product, GetProductDto>();
+
+           // CreateMap<GetOneProductDto, Product>();
+            CreateMap<Product, GetOneProductDto>();
         }
     }
 }

@@ -25,18 +25,21 @@ namespace Services.Implementation
         public Product GetProduct(int productId, bool trackChanges) =>
         FindByCondition(p => p.ProductId.Equals(productId), trackChanges).SingleOrDefault();
 
-        public void CreateProduct(Product product)
-        {
-            throw new NotImplementedException();
-        }
+
+        public async Task<IEnumerable<Product>> GetByIds(IEnumerable<int> productIds, bool trackChanges) =>
+           await FindByCondition(p => productIds.Contains(p.ProductId), trackChanges).OrderBy(c=>c.Name).ToListAsync();
+
+
+        public void CreateProduct(Product product) => Create(product);
+     
 
         public void DeleteProduct(Product product)
         {
-            throw new NotImplementedException();
+            Delete(product);
         }
         public void UpdateProduct(Product product)
         {
-
+            Update(product);
         }
         /*        public Product CreateProduct(Product product)
                 {

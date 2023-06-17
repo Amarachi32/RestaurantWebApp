@@ -1,5 +1,6 @@
 ﻿using Contracts.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using Persistence.Configuration;
 using Services.Implementation;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ namespace Services.Extension
         {
             service.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
         }
-    }
 
+
+    }
 }

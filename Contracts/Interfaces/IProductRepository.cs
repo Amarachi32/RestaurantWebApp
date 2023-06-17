@@ -14,6 +14,6 @@ namespace Contracts.Interfaces
         Product GetProduct(int productId, bool trackChanges);
         void CreateProduct(Product product);
         void DeleteProduct(Product product);
-        void UpdateProduct(Product product);
+        void UpdateProduct( Product product);
     }
 }

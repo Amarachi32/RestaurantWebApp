@@ -11,7 +11,10 @@ namespace Contracts.DTOs
     {
 
     }
-
+    public class BookPurchaseVM : Book
+    {
+        public string Nonce { get; set; }
+    }
 
     public class PaymentDto: Book
     {

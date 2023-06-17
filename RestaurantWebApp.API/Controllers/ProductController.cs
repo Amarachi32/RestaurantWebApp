@@ -44,14 +44,16 @@ namespace RestaurantWebApp.API.Controllers
                 return BadRequest("product cant be null");
             }
             var createdProduct = _service.productService.CreateProduct(createProduct);
+            return Ok(createdProduct);
 
-            return CreatedAtRoute( "ProductById", new {id =createdProduct.Id}, createdProduct);
+           // return CreatedAtRoute( "ProductById", new {id =createdProduct.ProductId}, createdProduct);
         }
         [HttpPut]
         public IActionResult UpdateProduct(int productId, UpdateProductDto updateProduct) 
         {
-            _service.productService.UpdateProduct(productId, updateProduct,trackChanges: false);
-            return NoContent();
+           var upd =  _service.productService.UpdateProduct(productId, updateProduct,trackChanges: false);
+            //return NoContent();
+            return Ok(upd);
         }
 
         [HttpDelete]

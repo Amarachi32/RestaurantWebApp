@@ -63,12 +63,12 @@ namespace RestaurantWebApp.API
             builder.Services.AddAutoMapper(Assembly.Load("Persistence"));
             builder.Services.ConfigureRepo();
             builder.Services.ServiceConfigure();
-
+            builder.Services.ConfigCloudinary();
             builder.Services.AddControllers();
             
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
+            
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
