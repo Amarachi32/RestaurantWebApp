@@ -1,4 +1,6 @@
-﻿using Contracts.DTOs;
+﻿
+
+using Contracts.DTOs;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -6,9 +8,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Contracts.Interfaces
+namespace Presentation.Interfaces
 {
-  /*  public interface IShoppingCartRepository
+    public interface IShoppingCartService
     {
         Task<ShoppingCart> GetCart(string userId);
         Task<ApiResponse> UpdateShoppingCart(string userId, ShoppingItem shoppingItem);
@@ -18,5 +20,5 @@ namespace Contracts.Interfaces
         Task<ApiResponse> deleteShoppingItem(int shoppingItemId);
         Task<ShoppingCart> GetCartInIdWithShoppingItems(int shoppingCartId);
         Task<ApiResponse> UpdateShoppingCartPaymentMethod(string userId, string selectedPayment);
-    }*/
+    }
 }

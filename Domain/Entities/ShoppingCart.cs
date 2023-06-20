@@ -10,7 +10,7 @@ namespace Domain.Entities
     public class ShoppingCart
     {
 
-        public int Id { get; set; }
+        public int CartId { get; set; }
 
         public int TotalItems { get; set; }
 
@@ -18,10 +18,10 @@ namespace Domain.Entities
 
         public double OriginalPrice { get; set; }
 
-        public int UserId { get; set; }
+        public string UserId { get; set; }
 
         public string Note { get; set; }
-
+        //public Product Product { get; set; }    
         public User User { get; set; }
 
         public Order Order { get; set; }

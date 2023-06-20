@@ -1,5 +1,11 @@
-﻿using Contracts.Interfaces;
+﻿/*using Contracts.DTOs;
+using Contracts.Interfaces;
+using Domain.DbContext;
 using Domain.Entities;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+//using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,28 +16,30 @@ namespace Services.Implementation
 {
     public class ShoppingCartRepository: IShoppingCartRepository
     {
-        private readonly TrojantradingDbContext _trojantradingDbContext;
-        private readonly IUserRepository _userRepository;
-        private readonly IRepositoryV2<ShoppingCart> _shoppingCartRepository;
-        private readonly IRepositoryV2<ShoppingItem> _shoppingItemRepository;
-
+        private readonly ApplicationDbContext _context;
+       // private readonly IUserService _userService;
+        private readonly IRepository<ShoppingCart> _shoppingCartRepository;
+        private readonly IRepository<ShoppingItem> _shoppingItemRepository;
+       // private readonly IRepository<User> _userRepository;
+        private UserManager<User> _userManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         public ShoppingCartRepository(
-            TrojantradingDbContext trojantradingDbContext,
-            IUserRepository userRepository,
-            IRepositoryV2<ShoppingCart> shoppingCartRepository,
-            IRepositoryV2<ShoppingItem> shoppingItemRepository)
+            ApplicationDbContext context,
+            UserManager<User> userManager,
+            IRepository<ShoppingCart> shoppingCartRepository,
+            IRepository<ShoppingItem> shoppingItemRepository)
         {
-            _trojantradingDbContext = trojantradingDbContext;
-            _userRepository = userRepository;
+            _context = context;
+            _userManager = userManager;
             _shoppingCartRepository = shoppingCartRepository;
             _shoppingItemRepository = shoppingItemRepository;
         }
 
-        public async Task<ApiResponse> AddShoppingCart(int userId)
+        public async Task<ApiResponse> AddShoppingCart(string userId)
         {
             try
             {
-                var shoppingCart = await _shoppingCartRepository.Queryable.Where(sc => sc.UserId == userId && sc.Status == "0").GetFirstOrDefaultAsync();
+                var shoppingCart = await _shoppingCartRepository.Queryable.Where(sc => sc.UserId == userId && sc.Status == "0").FirstOrDefaultAsync();
                 if (shoppingCart == null)
                 {
                     ShoppingCart sc = new ShoppingCart()
@@ -45,8 +53,8 @@ namespace Services.Implementation
                         PaymentMethod = "onaccount"
                     };
 
-                    _shoppingCartRepository.Create(sc);
-                    await _shoppingCartRepository.SaveChangesAsync();
+                    _shoppingCartRepository.Add(sc);
+                    await _shoppingCartRepository.SaveAsync();//.SaveChangesAsync();
                     return new ApiResponse()
                     {
                         Status = "success",
@@ -73,21 +81,21 @@ namespace Services.Implementation
 
         }
 
-        public async Task<ShoppingCart> GetCart(int userId)
+        public async Task<ShoppingCart> GetCart(string userId)
         {
             var shoppingCart = await _shoppingCartRepository.Queryable
                 .Where(s => s.UserId == userId && s.Status == "0")
-                .GetFirstOrDefaultAsync();
+                .FirstOrDefaultAsync();
             return shoppingCart;
         }
 
-        public async Task<ShoppingCart> GetShoppingCartByID(int shoppingCartId, int userId)
+        public async Task<ShoppingCart> GetShoppingCartByID(int shoppingCartId, string userId)
         {
-            var shoppingCart = _trojantradingDbContext.ShoppingCarts.Where(s => s.Id == shoppingCartId)
-                               .GroupJoin(_trojantradingDbContext.ShoppingItems, sc => sc.Id, si => si.ShoppingCartId, (shoppingCartModel, shoppingItems) => new { ShoppingCart = shoppingCartModel, ShoppingItems = shoppingItems })
+            var shoppingCart = _context.ShoppingCarts.Where(s => s.CartId == shoppingCartId)
+                               .GroupJoin(_context.ShoppingItems, sc => sc.CartId, si => si.ShoppingCartId, (shoppingCartModel, shoppingItems) => new { ShoppingCart = shoppingCartModel, ShoppingItems = shoppingItems })
                                .Select(join => new ShoppingCart()
                                {
-                                   Id = join.ShoppingCart.Id,
+                                   CartId = join.ShoppingCart.CartId,
                                    TotalItems = join.ShoppingCart.TotalItems,
                                    TotalPrice = join.ShoppingCart.TotalPrice,
                                    ShoppingItems = join.ShoppingItems.ToList(),
@@ -100,13 +108,13 @@ namespace Services.Implementation
             if (shoppingCart.TotalItems > 0)
             {
                 shoppingCart.ShoppingItems = shoppingCart.ShoppingItems
-                            .Join(_trojantradingDbContext.Products, si => si.ProductId, p => p.Id, (shoppingItem, product) => new { ShoppingItem = shoppingItem, Product = product })
+                            .Join(_context.Products, si => si.ProductId, p => p.ProductId, (shoppingItem, product) => new { ShoppingItem = shoppingItem, Product = product })
                             .Select(join => new ShoppingItem
                             {
-                                Id = join.ShoppingItem.Id,
+                                ItemId = join.ShoppingItem.ItemId,
                                 Amount = join.ShoppingItem.Amount,
                                 Product = join.Product,
-                                ProductId = join.Product.Id,
+                                ProductId = join.Product.ProductId,
                                 Status = join.ShoppingItem.Status,
                                 Packaging = join.ShoppingItem.Packaging
                             }).ToList();
@@ -115,13 +123,13 @@ namespace Services.Implementation
             return shoppingCart;
         }
 
-        public async Task<ShoppingCart> GetCartWithShoppingItems(int userId)
+        public async Task<ShoppingCart> GetCartWithShoppingItems(string userId)
         {
-            var shoppingCart = _trojantradingDbContext.ShoppingCarts.Where(sc => sc.UserId == userId && sc.Status == "0")
-                                .GroupJoin(_trojantradingDbContext.ShoppingItems, sc => sc.Id, si => si.ShoppingCartId, (shoppingCartModel, shoppingItems) => new { ShoppingCart = shoppingCartModel, ShoppingItems = shoppingItems })
+            var shoppingCart = _context.ShoppingCarts.Where(sc => sc.UserId == userId && sc.Status == "0")
+                                .GroupJoin(_context.ShoppingItems, sc => sc.CartId, si => si.ShoppingCartId, (shoppingCartModel, shoppingItems) => new { ShoppingCart = shoppingCartModel, ShoppingItems = shoppingItems })
                                 .Select(join => new ShoppingCart()
                                 {
-                                    Id = join.ShoppingCart.Id,
+                                    CartId = join.ShoppingCart.CartId,
                                     TotalItems = join.ShoppingCart.TotalItems,
                                     TotalPrice = join.ShoppingCart.TotalPrice,
                                     ShoppingItems = join.ShoppingItems.ToList(),
@@ -135,13 +143,13 @@ namespace Services.Implementation
             if (shoppingCart.TotalItems > 0)
             {
                 shoppingCart.ShoppingItems = shoppingCart.ShoppingItems
-                            .Join(_trojantradingDbContext.Products, si => si.ProductId, p => p.Id, (shoppingItem, product) => new { ShoppingItem = shoppingItem, Product = product })
+                            .Join(_context.Products, si => si.ProductId, p => p.ProductId, (shoppingItem, product) => new { ShoppingItem = shoppingItem, Product = product })
                             .Select(join => new ShoppingItem
                             {
-                                Id = join.ShoppingItem.Id,
+                                ItemId = join.ShoppingItem.ItemId,
                                 Amount = join.ShoppingItem.Amount,
                                 Product = join.Product,
-                                ProductId = join.Product.Id,
+                                ProductId = join.Product.ProductId,
                                 Status = join.ShoppingItem.Status,
                                 Packaging = join.ShoppingItem.Packaging
                             }).ToList();
@@ -153,11 +161,11 @@ namespace Services.Implementation
 
         public async Task<ShoppingCart> GetCartInIdWithShoppingItems(int shoppingCartId)
         {
-            var shoppingCart = _trojantradingDbContext.ShoppingCarts.Where(sc => sc.Id == shoppingCartId)
-                                .GroupJoin(_trojantradingDbContext.ShoppingItems, sc => sc.Id, si => si.ShoppingCartId, (shoppingCartModel, shoppingItems) => new { ShoppingCart = shoppingCartModel, ShoppingItems = shoppingItems })
+            var shoppingCart = _context.ShoppingCarts.Where(sc => sc.CartId == shoppingCartId)
+                                .GroupJoin(_context.ShoppingItems, sc => sc.CartId, si => si.ShoppingCartId, (shoppingCartModel, shoppingItems) => new { ShoppingCart = shoppingCartModel, ShoppingItems = shoppingItems })
                                 .Select(join => new ShoppingCart()
                                 {
-                                    Id = join.ShoppingCart.Id,
+                                    CartId = join.ShoppingCart.CartId,
                                     TotalItems = join.ShoppingCart.TotalItems,
                                     TotalPrice = join.ShoppingCart.TotalPrice,
                                     ShoppingItems = join.ShoppingItems.ToList(),
@@ -171,13 +179,13 @@ namespace Services.Implementation
             if (shoppingCart.TotalItems > 0)
             {
                 shoppingCart.ShoppingItems = shoppingCart.ShoppingItems
-                            .Join(_trojantradingDbContext.Products, si => si.ProductId, p => p.Id, (shoppingItem, product) => new { ShoppingItem = shoppingItem, Product = product })
+                            .Join(_context.Products, si => si.ProductId, p => p.ProductId, (shoppingItem, product) => new { ShoppingItem = shoppingItem, Product = product })
                             .Select(join => new ShoppingItem
                             {
-                                Id = join.ShoppingItem.Id,
+                                ItemId = join.ShoppingItem.ItemId,
                                 Amount = join.ShoppingItem.Amount,
                                 Product = join.Product,
-                                ProductId = join.Product.Id,
+                                ProductId = join.Product.ProductId,
                                 Status = join.ShoppingItem.Status,
                                 Packaging = join.ShoppingItem.Packaging
                             }).ToList();
@@ -187,7 +195,7 @@ namespace Services.Implementation
             return shoppingCart;
         }
 
-        public async Task<ApiResponse> UpdateShoppingCartPaymentMethod(int userId, string selectedPayment)
+        public async Task<ApiResponse> UpdateShoppingCartPaymentMethod(string userId, string selectedPayment)
         {
             try
             {
@@ -197,7 +205,7 @@ namespace Services.Implementation
                     shoppingCart.PaymentMethod = selectedPayment;
                 }
                 _shoppingCartRepository.Update(shoppingCart);
-                await _shoppingCartRepository.SaveChangesAsync();
+                await _shoppingCartRepository.SaveAsync();
                 return new ApiResponse()
                 {
                     Status = "success",
@@ -214,42 +222,42 @@ namespace Services.Implementation
             }
         }
 
-        public async Task<ApiResponse> UpdateShoppingCart(int userId, ShoppingItem shoppingItem)
+        public async Task<ApiResponse> UpdateShoppingCart(string userId, ShoppingItem shoppingItem)
         {
             try
             {
                 var shoppingCart = await GetCart(userId);
 
-                var user = await _userRepository.GetUserByAccount(userId);
-
-                int shoppingItemExists = _shoppingItemRepository.Queryable.Where(si => si.ShoppingCartId == shoppingCart.Id && si.ProductId == shoppingItem.Product.Id && si.Status == "0").Count();
+                //var user = await _userRepository.GetUserByAccount(userId);
+                var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
+                int shoppingItemExists = _shoppingItemRepository.Queryable.Where(si => si.ShoppingCartId == shoppingCart.CartId && si.ProductId == shoppingItem.Product.ProductId && si.Status == "0").Count();
 
                 if (shoppingItemExists > 0)
                 {
-                    var shoppingItemModel = await _shoppingItemRepository.Queryable.Where(si => si.ShoppingCartId == shoppingCart.Id && si.ProductId == shoppingItem.Product.Id && si.Status == "0").GetFirstOrDefaultAsync();
+                    var shoppingItemModel = await _shoppingItemRepository.Queryable.Where(si => si.ShoppingCartId == shoppingCart.CartId && si.ProductId == shoppingItem.Product.ProductId && si.Status == "0").FirstOrDefaultAsync();
                     shoppingItemModel.Amount += shoppingItem.Amount;
                     shoppingItemModel.Packaging = shoppingItem.Packaging;
                     _shoppingItemRepository.Update(shoppingItemModel);
-                    await _shoppingItemRepository.SaveChangesAsync();
+                    await _shoppingItemRepository.SaveAsync();
                 }
                 else
                 {
                     ShoppingItem si = new ShoppingItem()
                     {
                         Amount = shoppingItem.Amount,
-                        ProductId = shoppingItem.Product.Id,
-                        ShoppingCartId = shoppingCart.Id,
+                        ProductId = shoppingItem.Product.ProductId,
+                        ShoppingCartId = shoppingCart.CartId,
                         Status = "0",
                         Packaging = shoppingItem.Packaging
                     };
-                    _shoppingItemRepository.Create(si);
-                    await _shoppingItemRepository.SaveChangesAsync();
+                    _shoppingItemRepository.Add(si);
+                    await _shoppingItemRepository.SaveAsync();
                 }
 
                 shoppingCart.TotalItems += shoppingItem.Amount;
                 updateShoppingCartPrice(shoppingCart, user, shoppingItem);
                 _shoppingCartRepository.Update(shoppingCart);
-                await _shoppingCartRepository.SaveChangesAsync();
+                await _shoppingCartRepository.SaveAsync();
                 return new ApiResponse()
                 {
                     Status = "success",
@@ -271,10 +279,10 @@ namespace Services.Implementation
             try
             {
                 var shoppingItem = _shoppingItemRepository.Queryable
-                                    .Where(s => s.Id == shoppingItemId)
+                                    .Where(s => s.ItemId == shoppingItemId)
                                     .FirstOrDefault();
                 _shoppingItemRepository.Delete(shoppingItem);
-                await _shoppingItemRepository.SaveChangesAsync();
+                await _shoppingItemRepository.SaveAsync();
                 return new ApiResponse()
                 {
                     Status = "success"
@@ -305,3 +313,4 @@ namespace Services.Implementation
     }
 }
 
+*/

@@ -39,7 +39,7 @@ namespace Presentation.Implementation
             {
                 if(_orderService == null)
                 {
-                    _orderService= new OrderService();
+                   // _orderService= new OrderService();
                 }
                 return _orderService;
             }

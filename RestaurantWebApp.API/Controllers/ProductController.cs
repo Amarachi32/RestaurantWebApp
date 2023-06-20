@@ -1,5 +1,5 @@
-﻿
-using Contracts.DTOs;
+﻿using Contracts.DTOs;
+using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Interfaces;
@@ -10,57 +10,61 @@ namespace RestaurantWebApp.API.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        private IServiceManager _service;
-        public ProductController(IServiceManager service)
+        private readonly IProductServices _productService;
+        public ProductController(IProductServices services)
         {
-            _service = service;
+            _productService = services;
         }
 
-        [HttpGet]
-        public IActionResult GetProducts()
+
+        [HttpGet("GetAllProducts")]
+        [ProducesResponseType(typeof(List<Product>), 200)]
+        [ProducesResponseType(typeof(ApiResponse), 400)]
+        public async Task<IActionResult> GetAllProducts()
         {
             try
             {
-                var product = _service.productService.GetAllProducts(trackChanges: false);
-                return Ok(product);
-            } catch (Exception ex)
+                List<Product> products = new List<Product>();
+                products = await _productService.GetAllProducts();
+                return Ok(products);
+            }
+            catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return Ok(new ApiResponse { Status = "false", Message = ex.Message });
+
             }
         }
 
-        [HttpGet("{id:int}", Name = "ProductById")]
-        public IActionResult GetProduct(int id)
+        [HttpPost("AddProduct")]
+        [ProducesResponseType(typeof(ApiResponse), 200)]
+        [ProducesResponseType(typeof(ApiResponse), 400)]
+        public async Task<IActionResult> AddProduct([FromBody] Product product)
         {
-            var product = _service.productService.GetProduct(id, trackChanges: false);
-            return Ok(product);
+            return Ok(await _productService.Add(product));
         }
 
-        [HttpPost]
-        public IActionResult CreateProduct([FromBody] CreateProductDto createProduct)
+        [HttpPost("UpdateProduct")]
+        [ProducesResponseType(typeof(ApiResponse), 200)]
+        [ProducesResponseType(typeof(ApiResponse), 400)]
+        public async Task<IActionResult> UpdateProduct([FromBody] Product product)
         {
-            if(createProduct is null)
-            {
-                return BadRequest("product cant be null");
-            }
-            var createdProduct = _service.productService.CreateProduct(createProduct);
-            return Ok(createdProduct);
-
-           // return CreatedAtRoute( "ProductById", new {id =createdProduct.ProductId}, createdProduct);
-        }
-        [HttpPut]
-        public IActionResult UpdateProduct(int productId, UpdateProductDto updateProduct) 
-        {
-           var upd =  _service.productService.UpdateProduct(productId, updateProduct,trackChanges: false);
-            //return NoContent();
-            return Ok(upd);
+            return Ok(await _productService.UpdateProduct(product));
         }
 
-        [HttpDelete]
-        public IActionResult DeleteProduct(int id)
+        [HttpPost("UpdatePackagingList")]
+        [ProducesResponseType(typeof(ApiResponse), 200)]
+        [ProducesResponseType(typeof(ApiResponse), 400)]
+        public async Task<IActionResult> UpdatePackagingList(int productId, [FromBody] List<PackagingList> lists)
         {
-            _service.productService.DeleteProduct(id, trackChanges: false);
-            return NoContent();
+            return Ok(await _productService.UpdatePackagingList(lists, productId));
+        }
+
+        [HttpPost("DeleteProduct")]
+        [ProducesResponseType(typeof(ApiResponse), 200)]
+        [ProducesResponseType(typeof(ApiResponse), 400)]
+        public async Task<IActionResult> DeleteProduct([FromBody] Product product)
+        {
+            return Ok(await _productService.DeleteProduct(product));
         }
     }
 }

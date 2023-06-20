@@ -11,7 +11,7 @@ namespace Contracts.DTOs
         public string UserName { get; set; }
         public int UserId { get; set; }
         public string Token { get; set; }
-        public string Role { get; set; }x
+        public string Role { get; set; }
     }
 
     public class ApiResponse

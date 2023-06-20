@@ -11,6 +11,17 @@
         public int CategoryId { get; set; }
         public Category Category { get; set; }
         public bool isActive { get; set; }
+        public double AgentPrice { get; set; }
+        public double OriginalPrice { get; set; }
+
+        public double WholesalerPrice { get; set; }
         public DateTime CreatedDate { get; set; }
+        public List<PackagingList> PackagingLists { get; set; }
+    }
+    public class PackagingList
+    {
+        public int Id { get; set; }
+        public string PackageName { get; set; } // 1.OP 2.PP
+        public int ProductId { get; set; }
     }
 }

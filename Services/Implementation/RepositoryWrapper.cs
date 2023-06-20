@@ -37,7 +37,7 @@ namespace Services.Implementation
             {
                 if(_orderRepository== null)
                 {
-                    _orderRepository = new OrderRepository(_context);
+                   // _orderRepository = new OrderRepository(_context);
                 }
                 return (_orderRepository);
             }
